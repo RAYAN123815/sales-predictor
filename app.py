@@ -4,9 +4,25 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="📊 Sales & Profit Predictor", layout="wide")
 
-st.title("📊 Sales & Profit Predictor")
-st.write("Enter last 6 months data and get prediction for next 6 months with charts.")
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-image: linear-gradient(to bottom, #87CEEB, #A9A9A9); /* Light Gray Background */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
+st.markdown(
+    """
+    <h1 style='text-align:center; color:#2c3e50;'>📊 Advanced Sales & Profit Predictor</h1>
+    <p style='text-align:center; font-size:18px; color:#FFFFFF;'>
+        Enter last 6 months of sales & profit and predict the next 6 months with AI-powered forecasting
+    </p>
+    """, unsafe_allow_html=True
+)
 # --- Dummy Data ---
 months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
 dummy_revenue = [120000, 115000, 118000, 122000, 125000, 130000]
