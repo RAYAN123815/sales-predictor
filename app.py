@@ -32,7 +32,7 @@ dummy_profit = [40000, 38000, 39000, 41000, 42000, 45000]
 st.subheader("Enter Last 6 Months Data")
 st.markdown(
     """
-    <div style='background-color:#f0f8ff; padding:10px; border-radius:10px;'>
+    <div style='background-color:#f0f8ff; padding:10px; border-radius:10px; margin-bottom:10px;'>
         <b>💡 Data Entry Guidelines:</b><br>
         • Enter realistic numbers (e.g., in the range of 10,000 – 200,000).<br>
         • Keep the scale consistent across months (avoid sudden jumps like 50,000 → 5,000,000).<br>
