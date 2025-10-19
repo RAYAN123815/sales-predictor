@@ -42,68 +42,94 @@ for i, m in enumerate(months):
         profit.append(p)
 
 if st.button("Run Prediction"):
-    # --- Linear Growth ---
-    rev_growth = (revenue[-1] - revenue[0]) / (len(revenue) - 1)
-    prof_growth = (profit[-1] - profit[0]) / (len(profit) - 1)
+    try:
+        # Convert safely
+        revenue = [float(r) for r in revenue]
+        profit = [float(p) for p in profit]
 
-    future_months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    future_revenue = [round(revenue[-1] + (i+1)*rev_growth) for i in range(6)]
-    future_profit = [round(profit[-1] + (i+1)*prof_growth) for i in range(6)]
+        # Linear growth calculation
+        rev_growth = (revenue[-1] - revenue[0]) / (len(revenue) - 1)
+        prof_growth = (profit[-1] - profit[0]) / (len(profit) - 1)
 
-    # --- DataFrames ---
-    df_hist = pd.DataFrame({"Month": months, "Revenue": revenue, "Profit": profit})
-    df_pred = pd.DataFrame({"Month": future_months, "Revenue": future_revenue, "Profit": future_profit})
+        # Future values
+        future_months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        future_revenue = [round(revenue[-1] + (i + 1) * rev_growth) for i in range(6)]
+        future_profit = [round(profit[-1] + (i + 1) * prof_growth) for i in range(6)]
 
-    st.subheader("📌 Historical Data")
-    st.dataframe(df_hist, use_container_width=True)
+        # Prevent negative values
+        future_revenue = [max(0, r) for r in future_revenue]
+        future_profit = [max(0, p) for p in future_profit]
 
-    st.subheader("📌 Predicted Data (Next 6 Months)")
-    st.dataframe(df_pred, use_container_width=True)
+        # Data display
+        df_hist = pd.DataFrame({"Month": months, "Revenue": revenue, "Profit": profit})
+        df_pred = pd.DataFrame({"Month": future_months, "Revenue": future_revenue, "Profit": future_profit})
 
-    all_months = months + future_months
-    all_revenue = revenue + future_revenue
-    all_profit = profit + future_profit
+        st.subheader("📌 Historical Data")
+        st.dataframe(df_hist, use_container_width=True)
 
-    # --- Charts ---
-    st.subheader("📈 Charts")
+        st.subheader("📌 Predicted Data (Next 6 Months)")
+        st.dataframe(df_pred, use_container_width=True)
 
-    col1, col2 = st.columns(2)
+        # Combine
+        all_months = months + future_months
+        all_revenue = revenue + future_revenue
+        all_profit = profit + future_profit
 
-    # Line Chart
-    with col1:
-        fig, ax = plt.subplots()
-        ax.plot(all_months, all_revenue, marker="o", label="Revenue", color="#3498db")
-        ax.plot(all_months, all_profit, marker="o", label="Profit", color="#2ecc71")
-        ax.axvline(x=months[-1], linestyle="--", color="gray", alpha=0.7, label="Prediction Start")
-        ax.set_title("Sales & Profit (Line Chart)")
-        ax.legend()
-        ax.grid(True, linestyle="--", alpha=0.6)
-        st.pyplot(fig)
+        # --- Charts ---
+        st.subheader("📈 Charts")
 
-    # Bar Chart
-    with col2:
-        fig, ax = plt.subplots()
-        ax.bar(all_months, all_revenue, color="#3498db", alpha=0.7, label="Revenue")
-        ax.bar(all_months, all_profit, color="#2ecc71", alpha=0.7, label="Profit")
-        ax.set_title("Sales & Profit (Bar Chart)")
-        ax.legend()
-        st.pyplot(fig)
+        col1, col2 = st.columns(2)
 
-    col3, col4 = st.columns(2)
+        # Line Chart
+        with col1:
+            fig, ax = plt.subplots()
+            ax.plot(all_months, all_revenue, marker="o", label="Revenue", color="#3498db")
+            ax.plot(all_months, all_profit, marker="o", label="Profit", color="#2ecc71")
+            ax.axvline(x=months[-1], linestyle="--", color="gray", alpha=0.7, label="Prediction Start")
+            ax.set_title("Sales & Profit (Line Chart)")
+            ax.legend()
+            ax.grid(True, linestyle="--", alpha=0.6)
+            st.pyplot(fig)
+            plt.close(fig)
 
-    # Pie Chart (Revenue Distribution Future)
-    with col3:
-        fig, ax = plt.subplots()
-        ax.pie(future_revenue, labels=future_months, autopct="%1.1f%%", colors=plt.cm.Paired.colors)
-        ax.set_title("Future Revenue Share")
-        st.pyplot(fig)
+        # Bar Chart
+        with col2:
+            fig, ax = plt.subplots()
+            ax.bar(all_months, all_revenue, color="#3498db", alpha=0.7, label="Revenue")
+            ax.bar(all_months, all_profit, color="#2ecc71", alpha=0.7, label="Profit")
+            ax.set_title("Sales & Profit (Bar Chart)")
+            ax.legend()
+            st.pyplot(fig)
+            plt.close(fig)
 
-    # Doughnut Chart (Profit Distribution Future)
-    with col4:
-        fig, ax = plt.subplots()
-        wedges, texts, autotexts = ax.pie(
-            future_profit, labels=future_months, autopct="%1.1f%%",
-            colors=plt.cm.Set3.colors, wedgeprops=dict(width=0.4)
-        )
-        ax.set_title("Future Profit Share (Doughnut)")
-        st.pyplot(fig)
+        col3, col4 = st.columns(2)
+
+        # Pie Chart (Revenue)
+        with col3:
+            fig, ax = plt.subplots()
+            safe_rev = [max(1, r) for r in future_revenue]  # avoid zero wedge sizes
+            ax.pie(safe_rev, labels=future_months, autopct="%1.1f%%", colors=plt.cm.Paired.colors)
+            ax.set_title("Future Revenue Share")
+            st.pyplot(fig)
+            plt.close(fig)
+
+        # Doughnut Chart (Profit)
+        with col4:
+            if sum(future_profit) == 0:
+                st.warning("⚠️ Predicted profits are zero or negative — chart skipped.")
+            else:
+                fig, ax = plt.subplots()
+                safe_prof = [max(1, p) for p in future_profit]
+                wedges, texts, autotexts = ax.pie(
+                    safe_prof,
+                    labels=future_months,
+                    autopct="%1.1f%%",
+                    colors=plt.cm.Set3.colors,
+                    wedgeprops=dict(width=0.4)
+                )
+                ax.set_title("Future Profit Share (Doughnut)")
+                st.pyplot(fig)
+                plt.close(fig)
+
+    except Exception as e:
+        st.error(f"⚠️ An error occurred: {e}")
